@@ -84,3 +84,44 @@ footer {
     text-align: center;
     color: var(--a-text-subtle, #666);
 }
+
+/* Tilgjengelighet */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--a-surface-action, #0067C5);
+    color: white;
+    padding: 0.5rem 1rem;
+    z-index: 100;
+    text-decoration: none;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Tilgjengelig datatabell */
+#data-table-container table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#data-table-container th,
+#data-table-container td {
+    padding: 0.5rem;
+    text-align: left;
+    border: 1px solid var(--a-border-subtle, #c6c2bf);
+}

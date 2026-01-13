@@ -171,6 +171,37 @@ function updateChart(data) {
         chart.destroy();
     }
     chart = renderChart(ctx, aggregated);
+    updateAccessibleTable(aggregated);
+}
+
+function updateAccessibleTable(aggregated) {
+    const container = document.getElementById('data-table-container');
+    if (!container) return;
+    
+    const { labels, groups } = aggregated;
+    const groupNames = Object.keys(groups);
+    
+    let html = `
+        <table>
+            <caption>Antall arbeidssøkere per yrkesgruppe og år</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Yrkesgruppe</th>
+                    ${labels.map(year => `<th scope="col">${year}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody>
+                ${groupNames.map(name => `
+                    <tr>
+                        <th scope="row">${name}</th>
+                        ${groups[name].map(val => `<td>${val.toLocaleString('nb-NO')}</td>`).join('')}
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    
+    container.innerHTML = html;
 }
 
 async function init() {
