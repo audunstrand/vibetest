@@ -60,8 +60,8 @@ describe('aggregateByGroupAndYear', () => {
 
 describe('getColor', () => {
     it('returnerer farge basert på index', () => {
-        expect(getColor(0)).toBe('#4e79a7');
-        expect(getColor(1)).toBe('#f28e2b');
+        expect(getColor(0)).toBe('#0067C5');
+        expect(getColor(1)).toBe('#66A3F4');
     });
 
     it('wrapper rundt når index overstiger antall farger', () => {

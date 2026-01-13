@@ -61,9 +61,18 @@ export function aggregateByGroupAndYear(data) {
     return { labels: years, groups };
 }
 
+// Aksel fargepalett for datavisualisering
 const COLORS = [
-    '#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f',
-    '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac'
+    '#0067C5', // a-blue-500 (primær)
+    '#66A3F4', // a-blue-300
+    '#005B82', // a-deepblue-500
+    '#06893A', // a-green-500
+    '#66C786', // a-green-300
+    '#A2AD00', // a-limegreen-500
+    '#634689', // a-purple-500
+    '#A18DBB', // a-purple-300
+    '#FF9100', // a-orange-500
+    '#368DA8', // a-lightblue-700
 ];
 
 export function getColor(index) {
