@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAV Arbeidssøkere per Yrke</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Arbeidssøkere per yrkesgruppe</h1>
+            <p>Data fra NAV - Gjennomsnittlig månedsbeholdning av arbeidssøkere</p>
+        </header>
+
+        <main>
+            <div class="controls">
+                <label for="group-filter">Yrkesgruppe:</label>
+                <select id="group-filter">
+                    <option value="all">Alle grupper</option>
+                </select>
+            </div>
+
+            <div class="chart-container">
+                <div id="loading">Laster data...</div>
+                <canvas id="chart"></canvas>
+            </div>
+        </main>
+
+        <footer>
+            <p>Datakilde: <a href="https://github.com/datahotellet/dataset-archive/tree/main/datasets/nav/arbeidssokere-yrke" target="_blank">Datahotellet</a></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
