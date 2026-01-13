@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Visualiseringer</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { color: #0067C5; }
+        .controls { margin: 20px 0; display: flex; gap: 20px; flex-wrap: wrap; }
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        select { padding: 8px; font-size: 16px; min-width: 200px; }
+        .chart-container { background: white; border: 1px solid #ccc; padding: 20px; margin: 20px 0; }
+        canvas { max-width: 100%; }
+        .info { background: #e6f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>NAV Arbeidssøkere - Alternative Visualiseringer</h1>
+    
+    <div class="info">
+        <h2>Oversikt over visualiseringstyper:</h2>
+        <ul>
+            <li><strong>Linjediagram:</strong> Viser utvikling over tid for hver yrkesgruppe</li>
+            <li><strong>Søylediagram:</strong> Sammenligner yrkesgrupper side ved side per år</li>
+            <li><strong>Stablede områder:</strong> Viser sammensetning og totalt over tid</li>
+            <li><strong>Horisontalt søylediagram:</strong> Bedre oversikt når det er mange grupper</li>
+            <li><strong>Sektordiagram:</strong> Viser fordeling for et valgt år</li>
+        </ul>
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label for="chart-type">Visualiseringstype:</label>
+            <select id="chart-type">
+                <option value="line">Linjediagram</option>
+                <option value="bar">Søylediagram</option>
+                <option value="stackedArea">Stablede områder</option>
+                <option value="horizontalBar">Horisontalt søylediagram</option>
+                <option value="pie">Sektordiagram (enkelt år)</option>
+            </select>
+        </div>
+        
+        <div class="control-group" id="year-select-group" style="display: none;">
+            <label for="year-select">Velg år:</label>
+            <select id="year-select">
+                <option>2020</option>
+                <option>2021</option>
+                <option selected>2022</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+    
+    <script>
+        // Mock data
+        const mockData = {
+            labels: ['2020', '2021', '2022'],
+            datasets: [
+                { label: 'Kontorarbeid', data: [12000, 13000, 11500], borderColor: '#0067C5', backgroundColor: '#0067C5' },
+                { label: 'Butikk og salg', data: [8000, 9000, 8500], borderColor: '#66A3F4', backgroundColor: '#66A3F4' },
+                { label: 'Helse og omsorg', data: [6000, 6500, 7000], borderColor: '#06893A', backgroundColor: '#06893A' },
+                { label: 'Bygg og anlegg', data: [5000, 5200, 4800], borderColor: '#FF9100', backgroundColor: '#FF9100' },
+                { label: 'Transport', data: [4000, 4300, 4100], borderColor: '#634689', backgroundColor: '#634689' }
+            ]
+        };
+        
+        const pieData2022 = {
+            labels: ['Kontorarbeid', 'Butikk og salg', 'Helse og omsorg', 'Bygg og anlegg', 'Transport'],
+            datasets: [{
+                data: [11500, 8500, 7000, 4800, 4100],
+                backgroundColor: ['#0067C5', '#66A3F4', '#06893A', '#FF9100', '#634689']
+            }]
+        };
+        
+        let chart;
+        
+        function renderChart(type) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            let config = {
+                type: type === 'horizontalBar' ? 'bar' : type === 'stackedArea' ? 'line' : type,
+                data: type === 'pie' ? pieData2022 : mockData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: type === 'pie' ? 'right' : 'bottom' },
+                        tooltip: {
+                            callbacks: type === 'pie' ? {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value.toLocaleString('nb-NO')} (${percentage}%)`;
+                                }
+                            } : {}
+                        }
+                    }
+                }
+            };
+            
+            if (type !== 'pie') {
+                config.options.scales = {
+                    y: { beginAtZero: true, title: { display: true, text: 'Antall arbeidssøkere' } },
+                    x: { title: { display: true, text: 'År' } }
+                };
+            }
+            
+            if (type === 'stackedArea') {
+                config.data.datasets = config.data.datasets.map(ds => ({
+                    ...ds,
+                    fill: true,
+                    backgroundColor: ds.borderColor + '80'
+                }));
+                config.options.scales.y.stacked = true;
+            } else if (type === 'horizontalBar') {
+                config.options.indexAxis = 'y';
+                config.options.scales.x.title.text = 'Antall arbeidssøkere';
+                config.options.scales.y.title.text = 'År';
+            } else if (type === 'bar') {
+                config.data.datasets = config.data.datasets.map(ds => ({
+                    ...ds,
+                    backgroundColor: ds.borderColor
+                }));
+            } else if (type === 'line') {
+                config.data.datasets = config.data.datasets.map(ds => ({
+                    ...ds,
+                    tension: 0.1,
+                    fill: false
+                }));
+            }
+            
+            chart = new Chart(ctx, config);
+        }
+        
+        document.getElementById('chart-type').addEventListener('change', (e) => {
+            const type = e.target.value;
+            const yearGroup = document.getElementById('year-select-group');
+            yearGroup.style.display = type === 'pie' ? 'flex' : 'none';
+            renderChart(type);
+        });
+        
+        // Initial render
+        renderChart('line');
+    </script>
+</body>
+</html>
