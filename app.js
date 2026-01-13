@@ -70,6 +70,15 @@ export function getColor(index) {
     return COLORS[index % COLORS.length];
 }
 
+export function getUniqueGroups(data) {
+    return [...new Set(data.map(d => d.yrke_grovgruppe))].sort();
+}
+
+export function filterByGroup(data, group) {
+    if (group === 'all') return data;
+    return data.filter(d => d.yrke_grovgruppe === group);
+}
+
 export function createChartDatasets(aggregated) {
     const groupNames = Object.keys(aggregated.groups);
     return groupNames.map((name, index) => ({
@@ -133,15 +142,46 @@ function showLoading(show) {
     if (loading) loading.classList.toggle('hidden', !show);
 }
 
+function populateDropdown(groups) {
+    const select = document.getElementById('group-filter');
+    if (!select) return;
+    
+    groups.forEach(group => {
+        const option = document.createElement('option');
+        option.value = group;
+        option.textContent = group;
+        select.appendChild(option);
+    });
+}
+
+function updateChart(data) {
+    const aggregated = aggregateByGroupAndYear(data);
+    const ctx = document.getElementById('chart').getContext('2d');
+    
+    if (chart) {
+        chart.destroy();
+    }
+    chart = renderChart(ctx, aggregated);
+}
+
 async function init() {
     try {
         showLoading(true);
         rawData = await loadData();
         console.log(`Lastet ${rawData.length} rader`);
         
-        const aggregated = aggregateByGroupAndYear(rawData);
-        const ctx = document.getElementById('chart').getContext('2d');
-        chart = renderChart(ctx, aggregated);
+        const groups = getUniqueGroups(rawData);
+        populateDropdown(groups);
+        
+        updateChart(rawData);
+        
+        const select = document.getElementById('group-filter');
+        if (select) {
+            select.addEventListener('change', (e) => {
+                const filtered = filterByGroup(rawData, e.target.value);
+                updateChart(filtered);
+            });
+        }
         
         showLoading(false);
     } catch (error) {

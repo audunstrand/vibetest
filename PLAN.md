@@ -36,9 +36,9 @@ Enkel webapp med Vanilla HTML/CSS/JS + Chart.js for å visualisere NAV arbeidss�
 - [x] Tooltip ved hover
 
 ### Task 5: Legg til dropdown-filter for yrkesgruppe
-- [ ] Dropdown med alle yrkesgrupper + "Alle"
-- [ ] Event listener som oppdaterer grafen
-- [ ] Umiddelbar oppdatering ved valg
+- [x] Dropdown med alle yrkesgrupper + "Alle"
+- [x] Event listener som oppdaterer grafen
+- [x] Umiddelbar oppdatering ved valg
 
 ### Task 6: Legg til enkel styling og layout
 - [ ] Responsiv container
@@ -55,7 +55,7 @@ Enkel webapp med Vanilla HTML/CSS/JS + Chart.js for å visualisere NAV arbeidss�
 | 2 | Last/parse CSV | 20 min | ✅ |
 | 3 | Aggregering | 15 min | ✅ |
 | 4 | Linjediagram | 20 min | ✅ |
-| 5 | Dropdown-filter | 15 min | 🔲 |
+| 5 | Dropdown-filter | 15 min | ✅ |
 | 6 | Styling | 10 min | 🔲 |
 
 **Total: ~1.5 timer**

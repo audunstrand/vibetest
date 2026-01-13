@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseRow, aggregateByGroupAndYear, getColor, createChartDatasets } from './app.js';
+import { parseRow, aggregateByGroupAndYear, getColor, createChartDatasets, getUniqueGroups, filterByGroup } from './app.js';
 
 describe('parseRow', () => {
     it('konverterer antall_arbeidssokere til tall', () => {
@@ -98,5 +98,50 @@ describe('createChartDatasets', () => {
         
         expect(datasets[0].tension).toBe(0.1);
         expect(datasets[0].fill).toBe(false);
+    });
+});
+
+describe('getUniqueGroups', () => {
+    it('returnerer unike yrkesgrupper sortert alfabetisk', () => {
+        const data = [
+            { yrke_grovgruppe: 'Helse' },
+            { yrke_grovgruppe: 'IT' },
+            { yrke_grovgruppe: 'Helse' },
+            { yrke_grovgruppe: 'Bygg' }
+        ];
+        
+        const result = getUniqueGroups(data);
+        
+        expect(result).toEqual(['Bygg', 'Helse', 'IT']);
+    });
+
+    it('returnerer tom array for tom input', () => {
+        expect(getUniqueGroups([])).toEqual([]);
+    });
+});
+
+describe('filterByGroup', () => {
+    it('returnerer alle data når filter er "all"', () => {
+        const data = [
+            { yrke_grovgruppe: 'IT' },
+            { yrke_grovgruppe: 'Helse' }
+        ];
+        
+        const result = filterByGroup(data, 'all');
+        
+        expect(result).toEqual(data);
+    });
+
+    it('filtrerer data til valgt gruppe', () => {
+        const data = [
+            { yrke_grovgruppe: 'IT', antall: 100 },
+            { yrke_grovgruppe: 'Helse', antall: 200 },
+            { yrke_grovgruppe: 'IT', antall: 150 }
+        ];
+        
+        const result = filterByGroup(data, 'IT');
+        
+        expect(result).toHaveLength(2);
+        expect(result.every(r => r.yrke_grovgruppe === 'IT')).toBe(true);
     });
 });
