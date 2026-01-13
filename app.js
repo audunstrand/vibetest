@@ -33,6 +33,29 @@ export function parseRows(rows) {
     }));
 }
 
+// Task 3: Aggreger data per yrkesgruppe og år
+export function aggregateByGroupAndYear(data) {
+    if (data.length === 0) {
+        return { labels: [], groups: {} };
+    }
+
+    // Finn unike år og grupper
+    const years = [...new Set(data.map(d => d.aar))].sort();
+    const groupNames = [...new Set(data.map(d => d.yrke_grovgruppe))];
+
+    // Summer per gruppe og år
+    const groups = {};
+    for (const group of groupNames) {
+        groups[group] = years.map(year => {
+            return data
+                .filter(d => d.yrke_grovgruppe === group && d.aar === year)
+                .reduce((sum, d) => sum + d.antall_arbeidssokere, 0);
+        });
+    }
+
+    return { labels: years, groups };
+}
+
 function showLoading(show) {
     const loading = document.getElementById('loading');
     if (loading) loading.classList.toggle('hidden', !show);

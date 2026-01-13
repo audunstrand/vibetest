@@ -18,16 +18,16 @@ Enkel webapp med Vanilla HTML/CSS/JS + Chart.js for å visualisere NAV arbeidss�
 - [x] Opprett testfil for app.js
 - [x] Verifiser at tester kjører
 
-### Task 2: Last og parse CSV-data
+### Task 2:st og parse CSV-data
 - [x] Funksjon `loadData()` som henter CSV fra GitHub
 - [x] Parse med PapaParse
 - [x] Konverter `antall_arbeidssokere` til tall
 - [x] Loading-indikator under lasting
 
 ### Task 3: Implementer aggregering per yrkesgruppe og år
-- [ ] Funksjon `aggregateByGroupAndYear(data)`
-- [ ] Summer `antall_arbeidssokere` per `yrke_grovgruppe` og `aar`
-- [ ] Output-format kompatibelt med Chart.js
+- [x] Funksjon `aggregateByGroupAndYear(data)`
+- [x] Summer `antall_arbeidssokere` per `yrke_grovgruppe` og `aar`
+- [x] Output-format kompatibelt med Chart.js
 
 ### Task 4: Vis linjediagram med utvikling over tid
 - [ ] Canvas-element med Chart.js linjediagram
@@ -53,7 +53,7 @@ Enkel webapp med Vanilla HTML/CSS/JS + Chart.js for å visualisere NAV arbeidss�
 |---|------|---------|--------|
 | 1 | Prosjektstruktur | 10 min | ✅ |
 | 2 | Last/parse CSV | 20 min | ✅ |
-| 3 | Aggregering | 15 min | 🔲 |
+| 3 | Aggregering | 15 min | ✅ |
 | 4 | Linjediagram | 20 min | 🔲 |
 | 5 | Dropdown-filter | 15 min | 🔲 |
 | 6 | Styling | 10 min | 🔲 |
