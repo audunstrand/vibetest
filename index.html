@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NAV Arbeidssøkere per Yrke</title>
+    
+    <!-- Aksel Design System -->
+    <link rel="preload" href="https://cdn.nav.no/aksel/@navikt/ds-css/7.8.0/index.min.css" as="style">
+    <link rel="stylesheet" href="https://cdn.nav.no/aksel/@navikt/ds-css/7.8.0/index.min.css">
+    
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -11,26 +16,26 @@
 <body>
     <div class="container">
         <header>
-            <h1>Arbeidssøkere per yrkesgruppe</h1>
-            <p>Data fra NAV - Gjennomsnittlig månedsbeholdning av arbeidssøkere</p>
+            <h1 class="navds-heading navds-heading--xlarge">Arbeidssøkere per yrkesgruppe</h1>
+            <p class="navds-body-long">Data fra NAV - Gjennomsnittlig månedsbeholdning av arbeidssøkere</p>
         </header>
 
         <main>
             <div class="controls">
-                <label for="group-filter">Yrkesgruppe:</label>
-                <select id="group-filter">
+                <label class="navds-label" for="group-filter">Yrkesgruppe:</label>
+                <select id="group-filter" class="navds-select__input">
                     <option value="all">Alle grupper</option>
                 </select>
             </div>
 
-            <div class="chart-container">
-                <div id="loading">Laster data...</div>
+            <div class="chart-container navds-panel">
+                <div id="loading" class="navds-body-short">Laster data...</div>
                 <canvas id="chart"></canvas>
             </div>
         </main>
 
         <footer>
-            <p>Datakilde: <a href="https://github.com/datahotellet/dataset-archive/tree/main/datasets/nav/arbeidssokere-yrke" target="_blank">Datahotellet</a></p>
+            <p class="navds-body-short">Datakilde: <a href="https://github.com/datahotellet/dataset-archive/tree/main/datasets/nav/arbeidssokere-yrke" target="_blank" class="navds-link">Datahotellet</a></p>
         </footer>
     </div>
 

@@ -41,9 +41,10 @@ Enkel webapp med Vanilla HTML/CSS/JS + Chart.js for å visualisere NAV arbeidss�
 - [x] Umiddelbar oppdatering ved valg
 
 ### Task 6: Legg til enkel styling og layout
-- [ ] Responsiv container
-- [ ] Tydelig tittel og beskrivelse
-- [ ] Mobilvennlig layout
+- [x] Responsiv container
+- [x] Tydelig tittel og beskrivelse
+- [x] Mobilvennlig layout
+- [x] Aksel (NAV design system) integrert via CDN
 
 ---
 
@@ -56,6 +57,6 @@ Enkel webapp med Vanilla HTML/CSS/JS + Chart.js for å visualisere NAV arbeidss�
 | 3 | Aggregering | 15 min | ✅ |
 | 4 | Linjediagram | 20 min | ✅ |
 | 5 | Dropdown-filter | 15 min | ✅ |
-| 6 | Styling | 10 min | 🔲 |
+| 6 | Styling | 10 min | ✅ |
 
 **Total: ~1.5 timer**
