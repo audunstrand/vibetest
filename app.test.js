@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseRows, aggregateByGroupAndYear } from './app.js';
+import { parseRows, aggregateByGroupAndYear, getColor, createChartDatasets } from './app.js';
 
 describe('parseRows', () => {
     it('konverterer antall_arbeidssokere til tall', () => {
@@ -73,5 +73,48 @@ describe('aggregateByGroupAndYear', () => {
         
         expect(result.labels).toEqual([]);
         expect(result.groups).toEqual({});
+    });
+});
+
+describe('getColor', () => {
+    it('returnerer farge basert på index', () => {
+        expect(getColor(0)).toBe('#4e79a7');
+        expect(getColor(1)).toBe('#f28e2b');
+    });
+
+    it('wrapper rundt når index overstiger antall farger', () => {
+        expect(getColor(10)).toBe(getColor(0));
+        expect(getColor(11)).toBe(getColor(1));
+    });
+});
+
+describe('createChartDatasets', () => {
+    it('oppretter datasets for Chart.js', () => {
+        const aggregated = {
+            labels: ['2020', '2021'],
+            groups: {
+                'IT': [100, 120],
+                'Helse': [200, 180]
+            }
+        };
+        
+        const datasets = createChartDatasets(aggregated);
+        
+        expect(datasets).toHaveLength(2);
+        expect(datasets[0].label).toBe('IT');
+        expect(datasets[0].data).toEqual([100, 120]);
+        expect(datasets[0].borderColor).toBeDefined();
+    });
+
+    it('setter riktige Chart.js egenskaper', () => {
+        const aggregated = {
+            labels: ['2020'],
+            groups: { 'Test': [50] }
+        };
+        
+        const datasets = createChartDatasets(aggregated);
+        
+        expect(datasets[0].tension).toBe(0.1);
+        expect(datasets[0].fill).toBe(false);
     });
 });

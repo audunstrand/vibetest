@@ -30,10 +30,10 @@ Enkel webapp med Vanilla HTML/CSS/JS + Chart.js for å visualisere NAV arbeidss�
 - [x] Output-format kompatibelt med Chart.js
 
 ### Task 4: Vis linjediagram med utvikling over tid
-- [ ] Canvas-element med Chart.js linjediagram
-- [ ] En linje per yrkesgruppe med ulike farger
-- [ ] Klikkbar legend for å toggle linjer
-- [ ] Tooltip ved hover
+- [x] Canvas-element med Chart.js linjediagram
+- [x] En linje per yrkesgruppe med ulike farger
+- [x] Klikkbar legend for å toggle linjer
+- [x] Tooltip ved hover
 
 ### Task 5: Legg til dropdown-filter for yrkesgruppe
 - [ ] Dropdown med alle yrkesgrupper + "Alle"
@@ -54,7 +54,7 @@ Enkel webapp med Vanilla HTML/CSS/JS + Chart.js for å visualisere NAV arbeidss�
 | 1 | Prosjektstruktur | 10 min | ✅ |
 | 2 | Last/parse CSV | 20 min | ✅ |
 | 3 | Aggregering | 15 min | ✅ |
-| 4 | Linjediagram | 20 min | 🔲 |
+| 4 | Linjediagram | 20 min | ✅ |
 | 5 | Dropdown-filter | 15 min | 🔲 |
 | 6 | Styling | 10 min | 🔲 |
 
