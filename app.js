@@ -5,9 +5,18 @@ export const DATA_URL = 'https://raw.githubusercontent.com/datahotellet/dataset-
 let rawData = [];
 let chart = null;
 
-// Task 2: Last og parse CSV-data
+export function parseRow(row) {
+    return {
+        ...row,
+        antall_arbeidssokere: parseInt(row.antall_arbeidssokere, 10) || 0
+    };
+}
+
 export async function loadData(fetchFn = fetch, parseFn = Papa.parse) {
     const response = await fetchFn(DATA_URL);
+    if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+    }
     const csvText = await response.text();
     
     return new Promise((resolve, reject) => {
@@ -15,10 +24,7 @@ export async function loadData(fetchFn = fetch, parseFn = Papa.parse) {
             header: true,
             skipEmptyLines: true,
             complete: (results) => {
-                const data = results.data.map(row => ({
-                    ...row,
-                    antall_arbeidssokere: parseInt(row.antall_arbeidssokere, 10) || 0
-                }));
+                const data = results.data.map(parseRow);
                 resolve(data);
             },
             error: (error) => reject(error)
@@ -26,37 +32,35 @@ export async function loadData(fetchFn = fetch, parseFn = Papa.parse) {
     });
 }
 
-export function parseRows(rows) {
-    return rows.map(row => ({
-        ...row,
-        antall_arbeidssokere: parseInt(row.antall_arbeidssokere, 10) || 0
-    }));
-}
-
-// Task 3: Aggreger data per yrkesgruppe og år
+// Aggreger data per yrkesgruppe og år
 export function aggregateByGroupAndYear(data) {
     if (data.length === 0) {
         return { labels: [], groups: {} };
     }
 
-    // Finn unike år og grupper
-    const years = [...new Set(data.map(d => d.aar))].sort();
-    const groupNames = [...new Set(data.map(d => d.yrke_grovgruppe))];
+    const yearSet = new Set();
+    const groupYearSums = {};
 
-    // Summer per gruppe og år
+    for (const row of data) {
+        const { aar, yrke_grovgruppe, antall_arbeidssokere } = row;
+        yearSet.add(aar);
+        
+        if (!groupYearSums[yrke_grovgruppe]) {
+            groupYearSums[yrke_grovgruppe] = {};
+        }
+        groupYearSums[yrke_grovgruppe][aar] = (groupYearSums[yrke_grovgruppe][aar] || 0) + antall_arbeidssokere;
+    }
+
+    const years = [...yearSet].sort();
     const groups = {};
-    for (const group of groupNames) {
-        groups[group] = years.map(year => {
-            return data
-                .filter(d => d.yrke_grovgruppe === group && d.aar === year)
-                .reduce((sum, d) => sum + d.antall_arbeidssokere, 0);
-        });
+    
+    for (const group of Object.keys(groupYearSums)) {
+        groups[group] = years.map(year => groupYearSums[group][year] || 0);
     }
 
     return { labels: years, groups };
 }
 
-// Task 4: Generer farger for grafen
 const COLORS = [
     '#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f',
     '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac'
@@ -66,7 +70,6 @@ export function getColor(index) {
     return COLORS[index % COLORS.length];
 }
 
-// Task 4: Opprett Chart.js datasets
 export function createChartDatasets(aggregated) {
     const groupNames = Object.keys(aggregated.groups);
     return groupNames.map((name, index) => ({
@@ -79,7 +82,6 @@ export function createChartDatasets(aggregated) {
     }));
 }
 
-// Task 4: Rendre linjediagram
 export function renderChart(ctx, aggregated) {
     const datasets = createChartDatasets(aggregated);
     
