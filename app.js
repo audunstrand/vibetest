@@ -124,7 +124,19 @@ export function renderChart(ctx, aggregated) {
                 },
                 tooltip: {
                     mode: 'index',
-                    intersect: false
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toLocaleString('nb-NO');
+                            }
+                            return label;
+                        }
+                    }
                 }
             },
             scales: {
@@ -133,6 +145,11 @@ export function renderChart(ctx, aggregated) {
                     title: {
                         display: true,
                         text: 'Antall arbeidssøkere'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('nb-NO');
+                        }
                     }
                 },
                 x: {
@@ -208,7 +225,6 @@ async function init() {
     try {
         showLoading(true);
         rawData = await loadData();
-        console.log(`Lastet ${rawData.length} rader`);
         
         const groups = getUniqueGroups(rawData);
         populateDropdown(groups);
@@ -226,8 +242,13 @@ async function init() {
         showLoading(false);
     } catch (error) {
         console.error('Feil ved lasting av data:', error);
+        showLoading(false);
         const loading = document.getElementById('loading');
-        if (loading) loading.textContent = 'Feil ved lasting av data';
+        if (loading) {
+            loading.classList.remove('hidden');
+            loading.textContent = 'Kunne ikke laste data. Vennligst prøv igjen senere.';
+            loading.setAttribute('role', 'alert');
+        }
     }
 }
 
