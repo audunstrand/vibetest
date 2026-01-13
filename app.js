@@ -5,6 +5,7 @@ export const DATA_URL = 'https://raw.githubusercontent.com/datahotellet/dataset-
 let rawData = [];
 let chart = null;
 let currentChartType = 'line';
+let cachedYears = [];
 
 export function parseRow(row) {
     return {
@@ -167,11 +168,24 @@ export function renderChart(ctx, aggregated, chartType = 'line') {
     
     // Customize based on chart type
     if (chartType === 'stackedArea') {
-        chartConfig.data.datasets = chartConfig.data.datasets.map(ds => ({
-            ...ds,
-            fill: true,
-            backgroundColor: ds.borderColor + '80' // Add transparency
-        }));
+        chartConfig.data.datasets = chartConfig.data.datasets.map(ds => {
+            // Convert hex color to rgba with transparency
+            const hex = ds.borderColor;
+            let rgba;
+            if (hex.startsWith('#')) {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                rgba = `rgba(${r}, ${g}, ${b}, 0.5)`;
+            } else {
+                rgba = hex; // fallback to original color if not hex
+            }
+            return {
+                ...ds,
+                fill: true,
+                backgroundColor: rgba
+            };
+        });
         chartConfig.options.scales.y.stacked = true;
     } else if (chartType === 'horizontalBar') {
         chartConfig.options.indexAxis = 'y';
@@ -274,15 +288,27 @@ function toggleGroupFilter(show) {
 
 function updateChart(data, chartType = 'line', selectedYear = null) {
     const ctx = document.getElementById('chart').getContext('2d');
+    const canvas = document.getElementById('chart');
     
     if (chart) {
         chart.destroy();
     }
     
+    // Update aria-label based on chart type
+    const chartTypeLabels = {
+        'line': 'Linjediagram som viser antall arbeidssøkere per yrkesgruppe over tid',
+        'bar': 'Søylediagram som viser antall arbeidssøkere per yrkesgruppe over tid',
+        'stackedArea': 'Stablede områder som viser antall arbeidssøkere per yrkesgruppe over tid',
+        'horizontalBar': 'Horisontalt søylediagram som viser antall arbeidssøkere per yrkesgruppe over tid',
+        'pie': 'Sektordiagram som viser fordeling av arbeidssøkere per yrkesgruppe'
+    };
+    if (canvas) {
+        canvas.setAttribute('aria-label', chartTypeLabels[chartType] || chartTypeLabels['line']);
+    }
+    
     if (chartType === 'pie') {
-        if (!selectedYear) {
-            const years = getUniqueYears(data);
-            selectedYear = years[years.length - 1]; // Default to latest year
+        if (!selectedYear && cachedYears.length > 0) {
+            selectedYear = cachedYears[cachedYears.length - 1]; // Default to latest year
         }
         const yearData = aggregateByGroupForYear(data, selectedYear);
         chart = renderPieChart(ctx, yearData);
@@ -366,10 +392,10 @@ async function init() {
         console.log(`Lastet ${rawData.length} rader`);
         
         const groups = getUniqueGroups(rawData);
-        const years = getUniqueYears(rawData);
+        cachedYears = getUniqueYears(rawData);
         
         populateDropdown(groups);
-        populateYearDropdown(years);
+        populateYearDropdown(cachedYears);
         
         updateChart(rawData, currentChartType);
         
