@@ -24,11 +24,32 @@
 
         <main id="main-content">
             <div class="controls">
-                <label class="navds-label" for="group-filter">Yrkesgruppe:</label>
-                <select id="group-filter" class="navds-select__input" aria-describedby="filter-description">
-                    <option value="all">Alle grupper</option>
-                </select>
-                <span id="filter-description" class="visually-hidden">Velg yrkesgruppe for å filtrere grafen</span>
+                <div class="control-group">
+                    <label class="navds-label" for="chart-type">Visualiseringstype:</label>
+                    <select id="chart-type" class="navds-select__input" aria-describedby="chart-type-description">
+                        <option value="line">Linjediagram</option>
+                        <option value="bar">Søylediagram</option>
+                        <option value="stackedArea">Stablede områder</option>
+                        <option value="horizontalBar">Horisontalt søylediagram</option>
+                        <option value="pie">Sektordiagram (enkelt år)</option>
+                    </select>
+                    <span id="chart-type-description" class="visually-hidden">Velg type visualisering</span>
+                </div>
+                
+                <div class="control-group">
+                    <label class="navds-label" for="group-filter">Yrkesgruppe:</label>
+                    <select id="group-filter" class="navds-select__input" aria-describedby="filter-description">
+                        <option value="all">Alle grupper</option>
+                    </select>
+                    <span id="filter-description" class="visually-hidden">Velg yrkesgruppe for å filtrere grafen</span>
+                </div>
+                
+                <div class="control-group" id="year-filter-group" style="display: none;">
+                    <label class="navds-label" for="year-filter">År:</label>
+                    <select id="year-filter" class="navds-select__input" aria-describedby="year-description">
+                    </select>
+                    <span id="year-description" class="visually-hidden">Velg år for sektordiagram</span>
+                </div>
             </div>
 
             <div class="chart-container navds-panel">

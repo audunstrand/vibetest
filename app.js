@@ -4,6 +4,8 @@ export const DATA_URL = 'https://raw.githubusercontent.com/datahotellet/dataset-
 
 let rawData = [];
 let chart = null;
+let currentChartType = 'line';
+let cachedYears = [];
 
 export function parseRow(row) {
     return {
@@ -83,9 +85,28 @@ export function getUniqueGroups(data) {
     return [...new Set(data.map(d => d.yrke_grovgruppe))].sort();
 }
 
+export function getUniqueYears(data) {
+    return [...new Set(data.map(d => d.aar))].sort();
+}
+
 export function filterByGroup(data, group) {
     if (group === 'all') return data;
     return data.filter(d => d.yrke_grovgruppe === group);
+}
+
+export function aggregateByGroupForYear(data, year) {
+    const filtered = data.filter(d => d.aar === year);
+    const groupSums = {};
+    
+    for (const row of filtered) {
+        const { yrke_grovgruppe, antall_arbeidssokere } = row;
+        groupSums[yrke_grovgruppe] = (groupSums[yrke_grovgruppe] || 0) + antall_arbeidssokere;
+    }
+    
+    return {
+        labels: Object.keys(groupSums).sort(),
+        data: Object.keys(groupSums).sort().map(key => groupSums[key])
+    };
 }
 
 export function createChartDatasets(aggregated) {
@@ -100,11 +121,11 @@ export function createChartDatasets(aggregated) {
     }));
 }
 
-export function renderChart(ctx, aggregated) {
+export function renderChart(ctx, aggregated, chartType = 'line') {
     const datasets = createChartDatasets(aggregated);
     
-    return new Chart(ctx, {
-        type: 'line',
+    let chartConfig = {
+        type: chartType === 'horizontalBar' ? 'bar' : chartType === 'stackedArea' ? 'line' : chartType,
         data: {
             labels: aggregated.labels,
             datasets: datasets
@@ -160,6 +181,73 @@ export function renderChart(ctx, aggregated) {
                 }
             }
         }
+    };
+    
+    // Customize based on chart type
+    if (chartType === 'stackedArea') {
+        chartConfig.data.datasets = chartConfig.data.datasets.map(ds => {
+            // Convert hex color to rgba with transparency
+            const hex = ds.borderColor;
+            let rgba;
+            if (hex.startsWith('#')) {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                rgba = `rgba(${r}, ${g}, ${b}, 0.5)`;
+            } else {
+                rgba = hex; // fallback to original color if not hex
+            }
+            return {
+                ...ds,
+                fill: true,
+                backgroundColor: rgba
+            };
+        });
+        chartConfig.options.scales.y.stacked = true;
+    } else if (chartType === 'horizontalBar') {
+        chartConfig.options.indexAxis = 'y';
+        chartConfig.options.scales.x.title.text = 'Antall arbeidssøkere';
+        chartConfig.options.scales.y.title.text = 'År';
+    } else if (chartType === 'bar') {
+        // Bar chart specific settings
+        chartConfig.data.datasets = chartConfig.data.datasets.map(ds => ({
+            ...ds,
+            backgroundColor: ds.borderColor
+        }));
+    }
+    
+    return new Chart(ctx, chartConfig);
+}
+
+export function renderPieChart(ctx, yearData) {
+    return new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: yearData.labels,
+            datasets: [{
+                data: yearData.data,
+                backgroundColor: yearData.labels.map((_, i) => getColor(i))
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value.toLocaleString('nb-NO')} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
     });
 }
 
@@ -180,15 +268,73 @@ function populateDropdown(groups) {
     });
 }
 
-function updateChart(data) {
-    const aggregated = aggregateByGroupAndYear(data);
+function populateYearDropdown(years) {
+    const select = document.getElementById('year-filter');
+    if (!select) return;
+    
+    // Clear existing options
+    select.innerHTML = '';
+    
+    years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        select.appendChild(option);
+    });
+    
+    // Select the latest year by default
+    if (years.length > 0) {
+        select.value = years[years.length - 1];
+    }
+}
+
+function toggleYearFilter(show) {
+    const yearFilterGroup = document.getElementById('year-filter-group');
+    if (yearFilterGroup) {
+        yearFilterGroup.style.display = show ? 'flex' : 'none';
+    }
+}
+
+function toggleGroupFilter(show) {
+    const groupFilter = document.getElementById('group-filter');
+    const groupFilterLabel = groupFilter?.previousElementSibling;
+    if (groupFilter && groupFilter.parentElement) {
+        groupFilter.parentElement.style.display = show ? 'flex' : 'none';
+    }
+}
+
+function updateChart(data, chartType = 'line', selectedYear = null) {
     const ctx = document.getElementById('chart').getContext('2d');
+    const canvas = document.getElementById('chart');
     
     if (chart) {
         chart.destroy();
     }
-    chart = renderChart(ctx, aggregated);
-    updateAccessibleTable(aggregated);
+    
+    // Update aria-label based on chart type
+    const chartTypeLabels = {
+        'line': 'Linjediagram som viser antall arbeidssøkere per yrkesgruppe over tid',
+        'bar': 'Søylediagram som viser antall arbeidssøkere per yrkesgruppe over tid',
+        'stackedArea': 'Stablede områder som viser antall arbeidssøkere per yrkesgruppe over tid',
+        'horizontalBar': 'Horisontalt søylediagram som viser antall arbeidssøkere per yrkesgruppe over tid',
+        'pie': 'Sektordiagram som viser fordeling av arbeidssøkere per yrkesgruppe'
+    };
+    if (canvas) {
+        canvas.setAttribute('aria-label', chartTypeLabels[chartType] || chartTypeLabels['line']);
+    }
+    
+    if (chartType === 'pie') {
+        if (!selectedYear && cachedYears.length > 0) {
+            selectedYear = cachedYears[cachedYears.length - 1]; // Default to latest year
+        }
+        const yearData = aggregateByGroupForYear(data, selectedYear);
+        chart = renderPieChart(ctx, yearData);
+        updateAccessibleTableForPie(yearData, selectedYear);
+    } else {
+        const aggregated = aggregateByGroupAndYear(data);
+        chart = renderChart(ctx, aggregated, chartType);
+        updateAccessibleTable(aggregated);
+    }
 }
 
 function updateAccessibleTable(aggregated) {
@@ -221,21 +367,92 @@ function updateAccessibleTable(aggregated) {
     container.innerHTML = html;
 }
 
+function updateAccessibleTableForPie(yearData, year) {
+    const container = document.getElementById('data-table-container');
+    if (!container) return;
+    
+    const total = yearData.data.reduce((a, b) => a + b, 0);
+    
+    let html = `
+        <table>
+            <caption>Antall arbeidssøkere per yrkesgruppe for ${year}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Yrkesgruppe</th>
+                    <th scope="col">Antall</th>
+                    <th scope="col">Prosent</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${yearData.labels.map((name, i) => {
+                    const value = yearData.data[i];
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    return `
+                        <tr>
+                            <th scope="row">${name}</th>
+                            <td>${value.toLocaleString('nb-NO')}</td>
+                            <td>${percentage}%</td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
+    
+    container.innerHTML = html;
+}
+
 async function init() {
     try {
         showLoading(true);
         rawData = await loadData();
         
         const groups = getUniqueGroups(rawData);
+        cachedYears = getUniqueYears(rawData);
+        
         populateDropdown(groups);
+        populateYearDropdown(cachedYears);
         
-        updateChart(rawData);
+        updateChart(rawData, currentChartType);
         
-        const select = document.getElementById('group-filter');
-        if (select) {
-            select.addEventListener('change', (e) => {
+        // Chart type selector
+        const chartTypeSelect = document.getElementById('chart-type');
+        if (chartTypeSelect) {
+            chartTypeSelect.addEventListener('change', (e) => {
+                currentChartType = e.target.value;
+                const isPieChart = currentChartType === 'pie';
+                
+                toggleYearFilter(isPieChart);
+                toggleGroupFilter(!isPieChart);
+                
+                if (isPieChart) {
+                    const yearSelect = document.getElementById('year-filter');
+                    const selectedYear = yearSelect?.value;
+                    updateChart(rawData, currentChartType, selectedYear);
+                } else {
+                    const groupSelect = document.getElementById('group-filter');
+                    const filtered = filterByGroup(rawData, groupSelect?.value || 'all');
+                    updateChart(filtered, currentChartType);
+                }
+            });
+        }
+        
+        // Group filter
+        const groupSelect = document.getElementById('group-filter');
+        if (groupSelect) {
+            groupSelect.addEventListener('change', (e) => {
                 const filtered = filterByGroup(rawData, e.target.value);
-                updateChart(filtered);
+                updateChart(filtered, currentChartType);
+            });
+        }
+        
+        // Year filter (for pie chart)
+        const yearSelect = document.getElementById('year-filter');
+        if (yearSelect) {
+            yearSelect.addEventListener('change', (e) => {
+                if (currentChartType === 'pie') {
+                    updateChart(rawData, currentChartType, e.target.value);
+                }
             });
         }
         
