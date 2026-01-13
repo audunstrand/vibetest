@@ -13,6 +13,11 @@ Enkel webapp med Vanilla HTML/CSS/JS + Chart.js for å visualisere NAV arbeidss�
 - [x] `app.js` for JavaScript-logikk
 - [x] Chart.js og PapaParse inkludert via CDN
 
+### Task 1b: Sett opp testramme
+- [x] Installer test-bibliotek (Vitest eller lignende)
+- [x] Opprett testfil for app.js
+- [x] Verifiser at tester kjører
+
 ### Task 2: Last og parse CSV-data
 - [x] Funksjon `loadData()` som henter CSV fra GitHub
 - [x] Parse med PapaParse

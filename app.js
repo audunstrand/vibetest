@@ -1,17 +1,17 @@
 // NAV Arbeidssøkere Visualisering
 
-const DATA_URL = 'https://raw.githubusercontent.com/datahotellet/dataset-archive/main/datasets/nav/arbeidssokere-yrke/dataset.csv';
+export const DATA_URL = 'https://raw.githubusercontent.com/datahotellet/dataset-archive/main/datasets/nav/arbeidssokere-yrke/dataset.csv';
 
 let rawData = [];
 let chart = null;
 
 // Task 2: Last og parse CSV-data
-async function loadData() {
-    const response = await fetch(DATA_URL);
+export async function loadData(fetchFn = fetch, parseFn = Papa.parse) {
+    const response = await fetchFn(DATA_URL);
     const csvText = await response.text();
     
     return new Promise((resolve, reject) => {
-        Papa.parse(csvText, {
+        parseFn(csvText, {
             header: true,
             skipEmptyLines: true,
             complete: (results) => {
@@ -26,9 +26,16 @@ async function loadData() {
     });
 }
 
+export function parseRows(rows) {
+    return rows.map(row => ({
+        ...row,
+        antall_arbeidssokere: parseInt(row.antall_arbeidssokere, 10) || 0
+    }));
+}
+
 function showLoading(show) {
     const loading = document.getElementById('loading');
-    loading.classList.toggle('hidden', !show);
+    if (loading) loading.classList.toggle('hidden', !show);
 }
 
 async function init() {
@@ -41,8 +48,11 @@ async function init() {
         showLoading(false);
     } catch (error) {
         console.error('Feil ved lasting av data:', error);
-        document.getElementById('loading').textContent = 'Feil ved lasting av data';
+        const loading = document.getElementById('loading');
+        if (loading) loading.textContent = 'Feil ved lasting av data';
     }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', init);
+}

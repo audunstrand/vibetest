@@ -1,0 +1,25 @@
+{
+  "name": "vibetest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/audunstrand/vibetest.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/audunstrand/vibetest/issues"
+  },
+  "homepage": "https://github.com/audunstrand/vibetest#readme",
+  "devDependencies": {
+    "vitest": "^4.0.17"
+  }
+}
